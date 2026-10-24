@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CONTRIBUTOR
+}
+
+enum DisasterStatus {
+  ACTIVE
+  RESOLVED
+}
+
+enum ResourceType {
+  SHELTER
+  HOSPITAL
+  FOOD
+  WATER
+  RESCUE
+}
+
+model User {
+  id        String     @id @default(uuid())
+  username  String     @unique
+  password  String
+  role      UserRole   @default(CONTRIBUTOR)
+  disasters Disaster[] @relation("CreatedDisasters")
+  createdAt DateTime   @default(now())
+}
+
+model Disaster {
+  id          String            @id @default(uuid())
+  title       String
+  description String
+  location    String
+  latitude    Float?
+  longitude   Float?
+  tags        String[]
+  status      DisasterStatus    @default(ACTIVE)
+  createdBy   String
+  creator     User              @relation("CreatedDisasters", fields: [createdBy], references: [id])
+  resources   Resource[]
+  reports     CommunityReport[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([status])
+}
+
+model Resource {
+  id         String       @id @default(uuid())
+  name       String
+  type       ResourceType
+  location   String
+  latitude   Float
+  longitude  Float
+  disasterId String
+  disaster   Disaster     @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  createdAt  DateTime     @default(now())
+
+  @@index([disasterId])
+}
+
+model CommunityReport {
+  id         String   @id @default(uuid())
+  content    String
+  user       String
+  priority   String   @default("MEDIUM")
+  disasterId String
+  disaster   Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([disasterId, createdAt])
+}

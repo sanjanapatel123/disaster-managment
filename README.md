@@ -1,297 +1,245 @@
-# Disaster Response Coordination Platform
+# 🌍 Disaster Response Coordination Platform
 
-A backend-focused disaster response platform built to manage disaster incidents, resolve locations, find nearby emergency resources, and retrieve community reports.
+**A real-time disaster management platform for coordinating emergency incidents, nearby resources, and community reports.**
 
-The project uses REST APIs, PostgreSQL, JWT authentication, caching, and Socket.IO for real-time updates.
+Built with **Next.js, TypeScript, Node.js, Express, PostgreSQL, Prisma, and Socket.IO.**
 
-## Tech Stack
+---
 
-- **Backend:** Node.js, Express.js, TypeScript
-- **Database:** PostgreSQL
-- **ORM:** Prisma
-- **Authentication:** JWT and role-based authorization
-- **Validation:** Zod
-- **Real-time:** Socket.IO
-- **Location:** OpenStreetMap Nominatim with fallback handling
-- **Testing:** Vitest and Supertest
-- **Frontend:** Reserved for future UI integration
+## ✨ Key Features
 
-## Project Structure
+- 🚨 **Disaster Management** — Create, view, update, and manage disaster incidents.
+- 🔐 **Authentication & Authorization** — JWT-based authentication with Admin and Contributor roles.
+- 📍 **Location Intelligence** — Resolve disaster locations and search nearby emergency resources using geographic coordinates.
+- 🏥 **Nearby Resources** — Find shelters, hospitals, food, water, and rescue facilities within a specified radius.
+- 🗣️ **Community Reports** — Retrieve community reports with priority classification: HIGH, MEDIUM, and LOW.
+- ⚡ **Real-Time Updates** — Socket.IO events for disaster creation and updates.
+- 🧠 **Caching** — In-memory TTL caching for community reports to reduce repeated external requests.
+- 🛡️ **Input Validation** — Request validation using Zod.
+- 🧪 **Automated Testing** — Vitest and Supertest tests for API behavior, report handling, and priority classification.
+- 🎨 **Responsive Dashboard** — Separate Admin and Contributor interfaces with reusable components and notifications.
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | Next.js, React, TypeScript, Tailwind CSS |
+| UI & Feedback | Lucide React, Sonner |
+| API Communication | Axios |
+| Backend | Node.js, Express, TypeScript |
+| Database | PostgreSQL, Prisma ORM |
+| Authentication | JWT |
+| Real-Time Communication | Socket.IO |
+| Validation | Zod |
+| Testing | Vitest, Supertest |
+
+## 🏗️ Architecture
 
 ```text
-disaster-response-platform/
-├── backend/
-│   ├── prisma/
-│   │   ├── schema.prisma
-│   │   ├── seed.ts
-│   │   └── seed-resources.ts
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── validators/
-│   │   ├── app.ts
-│   │   └── server.ts
-│   ├── tests/
-│   ├── .env.example
-│   └── package.json
-├── frontend/
-└── README.md
+Frontend (Next.js)
+       │
+       ├── REST API (Axios)
+       └── Socket.IO Client
+                │
+                ▼
+Backend (Node.js + Express)
+       │
+       ├── Authentication & Authorization
+       ├── Disaster Management
+       ├── Location Services
+       ├── Nearby Resources
+       ├── Community Reports
+       └── Real-Time Event Broadcasting
+                │
+                ▼
+        PostgreSQL + Prisma
 ```
 
-## Getting Started
+## 👥 User Roles
 
-### 1. Requirements
+| Capability | Admin | Contributor | Public |
+|---|:---:|:---:|:---:|
+| View disasters | ✅ | ✅ | ✅ |
+| Create disasters | ✅ | ✅ | — |
+| Update disasters | ✅ | ✅ | — |
+| Delete disasters | ✅ | — | — |
+| Access admin dashboard | ✅ | — | — |
+| Access contributor dashboard | — | ✅ | — |
 
-Install the following:
+**Security:** Admin accounts are created through the backend seed process, not public registration. Protected API operations require JWT authentication and role authorization.
 
-- Node.js
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 22 or compatible version
 - npm
 - PostgreSQL
+- Git
 
-### 2. Install Dependencies
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sanjanapatel123/disaster-managment.git
+cd disaster-managment
+```
+
+### 2. Configure the backend
 
 ```bash
 cd backend
 npm install
 ```
 
-### 3. Configure Environment Variables
-
-Create a `.env` file inside the `backend/` directory by copying `.env.example`.
-
-Configure your PostgreSQL database URL, JWT secret, and admin seed credentials.
-
-Example:
+Create a `.env` file using `.env.example` and configure your local database connection and required secrets.
 
 ```env
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/disaster_response_db"
+JWT_SECRET="replace-with-a-secure-random-secret"
 PORT=5000
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/disaster_response_db?schema=public"
-JWT_SECRET="your-long-random-secret"
-ADMIN_USERNAME="admin"
-ADMIN_PASSWORD="your-strong-admin-password"
-FRONTEND_URL="http://localhost:5173"
-MOCK_REPORTS_FAILURE="false"
+FRONTEND_URL="http://localhost:3000"
 ```
 
-Use your own local credentials. Never commit `.env` or real secrets.
+Use the variable names required by the actual backend configuration. Never commit real secrets.
 
-### 4. Set Up the Database
-
-Create a PostgreSQL database named `disaster_response_db`, or update `DATABASE_URL` to use an existing database.
-
-Generate the Prisma Client:
+### 3. Set up the database
 
 ```bash
+npx prisma migrate deploy
 npx prisma generate
 ```
 
-Apply database migrations:
-
-```bash
-npx prisma migrate dev --name init
-```
-
-If migrations already exist in the repository, use the existing migration history instead of creating a duplicate initial migration.
-
-### 5. Seed the Admin User
+Create the Admin account using the configured seed script:
 
 ```bash
 npm run seed:admin
 ```
 
-This creates or updates the admin account using the credentials configured in `.env`.
+If your local setup requires resource seed data, run the resource seed script defined in the backend's `package.json`.
 
-### 6. Start the Backend
+### 4. Start the backend
 
 ```bash
 npm run dev
 ```
 
-The API runs at:
+Backend URL: `http://localhost:5000`
 
-`http://localhost:5000`
+Health check: `GET /health`
 
-Check the server and database connection:
+### 5. Configure and start the frontend
 
-`GET http://localhost:5000/health`
-
-### 7. Add Sample Resources (Optional)
-
-After creating a disaster, run:
+Open another terminal:
 
 ```bash
-npm run seed:resources
+cd frontend
+npm install
 ```
 
-This adds sample emergency resources for the latest disaster in the database. Run it only when sample data is needed.
+Create `.env.local`:
 
-## Main Features
-
-### Disaster Management
-
-| Method | Endpoint               | Description       |
-| ------ | ---------------------- | ----------------- |
-| POST   | `/disasters`           | Create a disaster |
-| GET    | `/disasters`           | List disasters    |
-| GET    | `/disasters?tag=flood` | Filter by tag     |
-| GET    | `/disasters/:id`       | Get a disaster    |
-| PATCH  | `/disasters/:id`       | Update a disaster |
-| DELETE | `/disasters/:id`       | Delete a disaster |
-
-### Location Resolution
-
-When a disaster is created, the system attempts to identify a location from its description and resolve it to latitude and longitude using OpenStreetMap Nominatim.
-
-Fallback handling helps the application respond when a location cannot be resolved. External geocoding may depend on network availability and provider limits.
-
-### Nearby Resources
-
-```http
-GET /disasters/:id/resources?lat=40.758&lng=-73.986&radius=10
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-The API returns resources within the requested radius. It uses a Haversine distance calculation in PostgreSQL to calculate distances in kilometers and filter nearby resources.
-
-### Community Reports
-
-```http
-GET /disasters/:id/reports
-```
-
-The API retrieves mock community reports, normalizes their fields, and assigns each report a `HIGH`, `MEDIUM`, or `LOW` priority using keyword-based rules.
-
-The mock service makes integration and failure scenarios testable without requiring real social-media API credentials.
-
-### Caching
-
-Community reports are cached in memory for **60 seconds per disaster**.
-
-- Cache hit: return cached reports.
-- Cache miss: fetch reports from the mock service, normalize them, and store them.
-- External service failure: return a gateway error instead of silently treating the request as successful.
-
-The in-memory cache is simple for this assignment but is not shared between server instances and is cleared when the process restarts.
-
-### Real-Time Updates
-
-The Socket.IO server broadcasts:
-
-- `disaster_created` when a disaster is created.
-- `disaster_updated` when a disaster is updated.
-
-A test client is available at `backend/src/test-socket.ts`.
-
-Start the backend first, then run the client in another terminal:
+Start the frontend:
 
 ```bash
-npx tsx src/test-socket.ts
+npm run dev
 ```
 
-Create or update a disaster using the API and observe the event payload in the client terminal.
+Open `http://localhost:3000`.
 
-## Authentication and Authorization
+> Keep PostgreSQL and the backend running while testing the frontend. Verify the exact npm scripts in each package's `package.json`.
 
-Register a contributor:
+## 🔌 API Reference
+
+Base URL: `http://localhost:5000`
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | Check API and database connectivity |
+| POST | `/auth/register` | Register a Contributor |
+| POST | `/auth/login` | Authenticate and obtain a JWT |
+| GET | `/disasters` | List disasters |
+| GET | `/disasters?tag=flood` | Filter disasters by tag |
+| POST | `/disasters` | Create a disaster |
+| GET | `/disasters/:id` | Get a disaster by ID |
+| PATCH | `/disasters/:id` | Update a disaster |
+| DELETE | `/disasters/:id` | Delete a disaster (Admin only) |
+| GET | `/disasters/:id/resources?lat=40.7128&lng=-74.0060&radius=10` | Find nearby resources |
+| GET | `/disasters/:id/reports` | Retrieve community reports |
+
+Protected endpoints require:
 
 ```http
-POST /auth/register
+Authorization: Bearer <JWT_TOKEN>
 ```
 
-Log in:
+## 🧪 Testing
 
-```http
-POST /auth/login
-```
-
-Use the returned JWT in protected requests:
-
-```http
-Authorization: Bearer <token>
-```
-
-Permissions:
-
-| Action           | Admin | Contributor |
-| ---------------- | ----- | ----------- |
-| Read disasters   | Yes   | Yes         |
-| Create disasters | Yes   | Yes         |
-| Update disasters | Yes   | Yes         |
-| Delete disasters | Yes   | No          |
-
-Public registration creates Contributor accounts; users cannot assign themselves the Admin role.
-
-## Testing
-
-Run the automated tests:
+From the backend directory:
 
 ```bash
 npm test
-```
-
-Build the TypeScript project:
-
-```bash
 npm run build
 ```
 
-The test suite covers API responses, input validation, authorization, community report caching, external-service failure handling, and priority classification.
+Use the included Postman collection to test authentication, disaster operations, nearby resources, and community reports.
 
-## Architecture
+## ⚙️ Implementation Notes
+
+- **Geospatial search:** Nearby resources are filtered using geographic coordinates and distance calculations in PostgreSQL.
+- **External data resilience:** Community reports use mock data, with an in-memory cache and a configurable failure mode for testing.
+- **Priority classification:** Community reports are categorized as HIGH, MEDIUM, or LOW.
+- **Real-time communication:** The backend broadcasts `disaster_created` and `disaster_updated` events through Socket.IO.
+- **Database evolution:** Prisma migrations are maintained in the backend project.
+
+## 📁 Project Structure
 
 ```text
-Client / Postman
-       |
-       v
-Express REST API
-       |
-       +--> JWT Authentication and Authorization
-       |
-       +--> Zod Validation
-       |
-       +--> Controllers and Services
-       |       |
-       |       +--> PostgreSQL via Prisma
-       |       +--> Location Geocoding Service
-       |       +--> Community Reports and TTL Cache
-       |       +--> Nearby Resource Search
-       |
-       +--> Socket.IO Real-Time Events
+disaster-managment/
+├── backend/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   └── schema.prisma
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── validators/
+│   ├── tests/
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── lib/
+│   └── package.json
+├── postman/
+├── .gitignore
+└── README.md
 ```
 
-## Technical Decisions and Trade-offs
+## 🔒 Security & Configuration
 
-- **PostgreSQL:** provides relational data integrity for users, disasters, resources, and reports.
-- **Prisma:** simplifies database access and schema management.
-- **Haversine calculation:** provides radius-based resource filtering without requiring a separate geospatial extension.
-- **Nominatim:** provides location resolution without requiring a paid geocoding API key.
-- **Mock community reports:** allow external integration and failure handling to be demonstrated without third-party credentials.
-- **In-memory caching:** keeps implementation simple, but does not support shared caching across multiple server instances.
-- **Socket.IO:** broadcasts updates to connected clients; events are not persisted for clients that are disconnected.
-- **Rule-based priority classification:** is lightweight and easy to test, but keyword matching is not a substitute for verified emergency assessment.
+- Keep `.env` and `.env.local` out of version control.
+- Use a strong, unique JWT secret.
+- Never commit database passwords or production credentials.
+- Public registration creates Contributors only.
+- Enforce authorization on the backend; frontend route guards are not a substitute for API security.
 
-## Limitations and Future Improvements
+## 👩‍💻 Author
 
-- Integrate a real community-report provider when access and credentials are available.
-- Use Redis for shared caching in a multi-instance deployment.
-- Consider PostGIS for larger-scale geospatial queries.
-- Add durable event delivery and more integration tests for production use.
-- Build a frontend for visual disaster and resource management.
+**Sanjana Patel**
 
-## AI Usage
+[GitHub Repository](https://github.com/sanjanapatel123/disaster-managment)
 
-**Tool used:** ChatGPT.
+---
 
-**What it helped with:** Implementation guidance, debugging, test development, and documentation.
-
-**What was manually implemented and verified:** Project configuration, database models and migrations, API integration, authentication, location and resource handling, caching, real-time events, and automated tests were run and checked during development.
-
-## API Documentation
-
-The Postman collection is included separately for testing the API endpoints. Configure the collection's `baseUrl`, log in to obtain a JWT, and use the token for protected requests.
-
-## Security
-
-Do not commit `.env`, database passwords, JWT secrets, or other credentials. Use `.env.example` to document required configuration without exposing real values.
+<p align="center">
+  <strong>Built to support faster coordination and better disaster response.</strong>
+</p>
